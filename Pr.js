@@ -4,7 +4,6 @@ const inputPartido = document.getElementById('partido_afiliado');
 const msgError = document.getElementById('mensaje-error');
 const msgExito = document.getElementById('mensaje-exito');
 
-// Manejo del campo partido político
 checkAfiliado.addEventListener('change', (e) => {
     if (e.target.checked) {
         inputPartido.classList.remove('oculto');
@@ -16,7 +15,6 @@ checkAfiliado.addEventListener('change', (e) => {
     }
 });
 
-// Interceptor del formulario
 form.addEventListener('submit', async (e) => {
     e.preventDefault();
     ocultarAlertas();
@@ -29,12 +27,12 @@ form.addEventListener('submit', async (e) => {
         apellido: document.getElementById('apellido').value.trim(),
         nombre: document.getElementById('nombre').value.trim(),
         fechaNacimiento: document.getElementById('fecha_nacimiento').value,
-        email: document.getElementById('correo').value.trim(), // Ajustado al id del HTML
+        email: document.getElementById('correo').value.trim(), 
         telefono: parseInt(document.getElementById('telefono').value.trim(), 10),
         direccion: document.getElementById('direccion').value.trim(),
         distritoElectoral: document.getElementById('distrito').value,
-        autoridadDeMesa: document.getElementById('fue_autoridad').checked ? 1 : 0, // Ajustado al id del HTML
-        capacitacion: document.getElementById('hizo_capacitacion').checked ? 1 : 0, // Ajustado al id del HTML
+        autoridadDeMesa: document.getElementById('fue_autoridad').checked ? 1 : 0, 
+        capacitacion: document.getElementById('hizo_capacitacion').checked ? 1 : 0, 
         nombrePartido: inputPartido.value.trim(),
         charlasSeleccionadas: charlasSeleccionadas
     };
@@ -47,7 +45,6 @@ form.addEventListener('submit', async (e) => {
     await registrarPostulante(payload);
 });
 
-// Comunicación HTTP con la API - POST
 async function registrarPostulante(datos) {
     try {
         const response = await fetch('http://127.0.0.1:5000/api/postulantes', {
@@ -70,7 +67,6 @@ async function registrarPostulante(datos) {
     }
 }
 
-// Comunicación HTTP con la API - GET
 async function cargarCharlas() {
     try {
         const response = await fetch('http://127.0.0.1:5000/api/charlas');
@@ -85,12 +81,9 @@ async function cargarCharlas() {
 
 // Renderizado de UI
 function renderizarMapaYCharlas(charlas) {
-    const ul = document.getElementById('lista-charlas');
+    const displaySede = document.getElementById('sede-seleccionada-display');
     const contenedorCharlasForm = document.getElementById('contenedor-charlas-form');
     
-    ul.innerHTML = '';
-    
-    // Si el contenedor existe en el HTML, lo preparamos
     if(contenedorCharlasForm) {
         contenedorCharlasForm.innerHTML = '<legend>Charlas de interés (Opcional)</legend>'; 
     }
@@ -99,22 +92,36 @@ function renderizarMapaYCharlas(charlas) {
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapa);
 
     charlas.forEach(charla => {
-        const li = document.createElement('li');
-        li.textContent = `${charla.nombre} (${charla.fecha} ${charla.horario}) - ${charla.sede_nombre}`;
-        ul.appendChild(li);
-
+        // Armamos el checkbox inyectando data-sede
         if(contenedorCharlasForm) {
             const labelForm = document.createElement('label');
-            labelForm.innerHTML = `<input type="checkbox" class="checkbox-charla" value="${charla.id}"> ${charla.nombre} (${charla.fecha})`;
+            labelForm.innerHTML = `<input type="checkbox" class="checkbox-charla" value="${charla.id}" data-sede="${charla.sede_nombre}"> ${charla.nombre} (${charla.fecha})`;
             contenedorCharlasForm.appendChild(labelForm);
         }
 
+        // Renderizado del pin en el mapa
         if (charla.coordenadas && charla.coordenadas.lat && charla.coordenadas.lng) {
             L.marker([charla.coordenadas.lat, charla.coordenadas.lng])
                 .addTo(mapa)
                 .bindPopup(`<b>${charla.sede_nombre}</b><br>${charla.sede_direccion}`);
         }
     });
+
+    // Delegación de eventos: escuchamos cambios en los checkboxes
+    if(contenedorCharlasForm) {
+        contenedorCharlasForm.addEventListener('change', (e) => {
+            if (e.target.classList.contains('checkbox-charla')) {
+                const checked = document.querySelectorAll('.checkbox-charla:checked');
+                if (checked.length > 0) {
+                    // Extraemos los atributos data-sede de todos los checkboxes tildados
+                    const sedes = Array.from(checked).map(cb => cb.getAttribute('data-sede'));
+                    displaySede.textContent = "Sedes seleccionadas: " + sedes.join(", ");
+                } else {
+                    displaySede.textContent = ""; // Limpiamos si desmarcan todo
+                }
+            }
+        });
+    }
 }
 
 // Utilidades UI

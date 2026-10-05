@@ -21,8 +21,9 @@ class GeoService:
 class CharlaService:
     def listar_charlas_con_mapa(self):
         charlas = [
-            {"id": 1, "nombre": "Orientación General", "fecha": "2026-11-01", "horario": "10:00", "sede_nombre": "Escuela 1", "sede_direccion": "Av. Cabildo 1500, CABA"}
-        ]
+            {"id": 1, "nombre": "Orientación General", "fecha": "2026-11-01", "horario": "10:00", "sede_nombre": "Escuela 1", "sede_direccion": "Av. Cabildo 1500, CABA"},
+            {"id": 2, "nombre": "Capacitación Técnica", "fecha": "2026-11-02", "horario": "14:00", "sede_nombre": "Sede Comunal 2", "sede_direccion": "Pres. José Evaristo Uriburu 1022, CABA"},
+            {"id": 3, "nombre": "Protocolo de Escrutinio", "fecha": "2026-11-03", "horario": "16:00", "sede_nombre": "Colegio Nacional", "sede_direccion": "Av. Corrientes 1500, CABA"}        ]
         geo = GeoService()
         for charla in charlas:
             charla['coordenadas'] = geo.obtener_coordenadas(charla['sede_direccion'])
