@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal de Autoridades de Mesa</title>
+    <link rel="stylesheet" href="Pr.css">
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+<body>
+    <header>
+        <h1>Convocatoria Autoridades de Mesa</h1>
+    </header>
+    <main>
+
+        <section id="registro">
+            <h2>Inscripción</h2>
+            <div id="mensaje-error" class="oculto alerta error"></div>
+            <div id="mensaje-exito" class="oculto alerta exito"></div>
+            
+            <form id="form-postulante">
+                <input type="text" id="nombre" placeholder="Nombre" required>
+                <input type="text" id="apellido" placeholder="Apellido" required>
+                <input type="text" id="dni" placeholder="DNI" required>
+                <input type="date" id="fecha_nacimiento" required>
+                <input type="text" id="direccion" placeholder="Dirección Actual" required>
+                <input type="tel" id="telefono" placeholder="Teléfono" required>
+                <input type="email" id="correo" placeholder="Correo de contacto" required>
+                
+                <select id="distrito" required>
+                    <option value="">Seleccione Distrito Electoral...</option>
+                    <option value="Buenos Aires">Buenos Aires</option>
+                    <option value="CABA">CABA</option>
+                </select>
+                
+                <label><input type="checkbox" id="fue_autoridad"> Fui autoridad de mesa previamente</label>
+                <label><input type="checkbox" id="hizo_capacitacion"> Realicé la capacitación</label>
+                <label><input type="checkbox" id="es_afiliado"> Estoy afiliado a una agrupación</label>
+                
+                <input type="text" id="partido_afiliado" placeholder="Indique el partido político" class="oculto">
+                <fieldset id="contenedor-charlas-form"></fieldset> 
+                <button type="submit">Registrarme</button>
+            </form>
+        </section>
+        
+        <section id="charlas">
+            <h2>Charlas de Orientación</h2>
+            <ul id="lista-charlas"></ul>
+            <div id="mapa"></div>
+        </section>
+    </main>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="Pr.js"></script>
+</body>
+</html>
+
