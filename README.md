@@ -12,7 +12,7 @@
 - Python 3.10 o superior
 - Conexión a internet (USIG, mapa y fuentes)
 
-## Instalación y Ejecución (Automatizada - Recomendado)
+## Instalación y Ejecución 
 Para instalar las dependencias e iniciar tanto el backend como el frontend de una sola vez, simplemente ejecuta el archivo batch incluido.
 Desde el Explorador de Windows, haz doble clic en iniciar.bat, o ejecútalo desde la consola (cmd) en la carpeta del proyecto:
 iniciar.bat
@@ -23,7 +23,7 @@ Este script se encargará automáticamente de:
 3.	Abrir el navegador en http://127.0.0.1:5500/Pr.html.
 (Para terminar la ejecución, simplemente cierra las ventanas de consola que se abrieron).
 
-## Ejecución Manual (Alternativa)
+## Ejecución Manual 
 Si prefieres levantar el proyecto manualmente, abre dos terminales en la carpeta del proyecto.
 
 Terminal 1 - Backend (la primera vez crea elecciones.db):
@@ -55,5 +55,5 @@ services/                   Lógica de negocio, un archivo por clase
   geo_service.py              Consulta a la API USIG para obtener coordenadas dinámicamente
 cargaPostulante.py          Acceso a datos (SQLite) de los postulantes
 database.py                 Creación del esquema de la base de datos
-Pr.html / Pr.css / Pr.js    Interfaz del postulante
+index.html / style.css / main.js    Interfaz del postulante
 
