@@ -1,0 +1,232 @@
+:root {
+    --fondo: #eceff3;
+    --superficie: #ffffff;
+    --texto: #1b2433;
+    --texto-suave: #566073;
+    --borde: #c9d1dc;
+    --primario: #1f4e8c;
+    --primario-hover: #173d6e;
+    --interes: #14735a;
+    --interes-fondo: #e4f3ee;
+    --radio: 6px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    font-family: "Public Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: var(--fondo);
+    color: var(--texto);
+    line-height: 1.5;
+}
+
+:focus-visible {
+    outline: 3px solid #2f7de1;
+    outline-offset: 2px;
+}
+
+.oculto { display: none !important; }
+
+/* ---------- Cabecera ---------- */
+.cabecera {
+    background: var(--primario);
+    color: #fff;
+    padding: 1.25rem 1.5rem;
+}
+.cabecera h1 { margin: 0; font-size: 1.5rem; }
+.cabecera p { margin: 0.25rem 0 0; max-width: 60ch; }
+
+/* ---------- Layout: formulario | mapa ---------- */
+.contenido {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 1.5rem;
+    align-items: start;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 1.5rem;
+}
+
+.formulario {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* ---------- Cuadros del formulario ---------- */
+.caja {
+    margin: 0;
+    min-width: 0;
+    padding: 1rem 1.25rem 1.25rem;
+    background: var(--superficie);
+    border: 1px solid var(--borde);
+    border-radius: var(--radio);
+}
+.caja legend {
+    padding: 0 0.5rem;
+    font-weight: 700;
+    color: var(--primario);
+}
+
+.grilla {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.9rem 1rem;
+}
+.campo { display: flex; flex-direction: column; gap: 0.25rem; min-width: 0; }
+.campo-completo { grid-column: 1 / -1; }
+
+label { font-size: 0.875rem; font-weight: 600; }
+small { color: var(--texto-suave); font-size: 0.8125rem; }
+
+.campo input,
+.campo select {
+    width: 100%;
+    padding: 0.6rem 0.7rem;
+    font: inherit;
+    color: inherit;
+    background: #fff;
+    border: 1px solid var(--borde);
+    border-radius: 4px;
+}
+
+.check {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0;
+    font-size: 1rem;
+    font-weight: 400;
+}
+.check input { width: 1.1rem; height: 1.1rem; accent-color: var(--primario); }
+.campo-partido { margin-top: 0.6rem; }
+
+/* ---------- Cuadro de charlas de interés ---------- */
+.caja-interes.vacia { border-style: dashed; background: transparent; }
+.opcional { font-weight: 400; color: var(--texto-suave); font-size: 0.875rem; }
+.contador { margin-left: 0.25rem; font-size: 0.875rem; font-weight: 600; color: var(--interes); }
+.interes-vacio { margin: 0; color: var(--texto-suave); }
+.ir-al-mapa { display: none; }
+
+.lista-interes {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+.interes-item {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.7rem 0.85rem;
+    background: var(--interes-fondo);
+    border-left: 4px solid var(--interes);
+    border-radius: 4px;
+}
+.interes-datos { display: flex; flex-direction: column; min-width: 0; font-size: 0.9rem; }
+.interes-datos span { color: var(--texto-suave); }
+.interes-acciones { display: flex; flex-direction: column; align-items: flex-end; gap: 0.25rem; flex-shrink: 0; }
+
+.btn-texto {
+    padding: 0.15rem 0;
+    font: inherit;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--primario);
+    text-decoration: underline;
+    background: none;
+    border: 0;
+    cursor: pointer;
+}
+.btn-texto.quitar { color: #a32a35; }
+
+.interes-item.nuevo { animation: entra 0.6s ease-out; }
+@keyframes entra { from { background-color: #b7e0d2; } }
+
+/* ---------- Alertas y envío ---------- */
+.alerta { padding: 0.75rem 1rem; border-radius: 4px; }
+.alerta.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+.alerta.exito { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+
+.btn-primario {
+    padding: 0.8rem 1rem;
+    font: inherit;
+    font-weight: 700;
+    color: #fff;
+    background: var(--primario);
+    border: 0;
+    border-radius: var(--radio);
+    cursor: pointer;
+}
+.btn-primario:hover { background: var(--primario-hover); }
+
+/* ---------- Panel del mapa ---------- */
+.panel-mapa {
+    position: sticky;
+    top: 1rem;
+    padding: 1rem 1.25rem 1.25rem;
+    background: var(--superficie);
+    border: 1px solid var(--borde);
+    border-radius: var(--radio);
+}
+.panel-mapa h2 { margin: 0 0 0.25rem; font-size: 1.125rem; color: var(--primario); }
+.mapa-estado { margin: 0 0 0.75rem; min-height: 1.4em; font-size: 0.9rem; color: var(--texto-suave); }
+.mapa-estado.con-error { color: #721c24; font-weight: 600; }
+
+#mapa {
+    height: calc(100vh - 11rem);
+    min-height: 360px;
+    border: 1px solid var(--borde);
+    border-radius: 4px;
+}
+
+.leaflet-container { font-family: inherit; }
+
+/* ---------- Popup de cada sede ---------- */
+.popup-sede h3 { margin: 0; font-size: 1rem; }
+.leaflet-popup-content .popup-sede p {
+    margin: 0.15rem 0;
+    font-size: 0.875rem;
+    color: var(--texto-suave);
+}
+.popup-charla {
+    margin-top: 0.6rem;
+    padding-top: 0.6rem;
+    border-top: 1px solid var(--borde);
+}
+.popup-charla strong { font-size: 0.95rem; }
+
+.btn-interes {
+    width: 100%;
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    font: inherit;
+    font-weight: 700;
+    color: #fff;
+    background: var(--primario);
+    border: 2px solid var(--primario);
+    border-radius: 4px;
+    cursor: pointer;
+}
+.btn-interes:hover { background: var(--primario-hover); border-color: var(--primario-hover); }
+.btn-interes.activo { color: var(--interes); background: #fff; border-color: var(--interes); }
+.btn-interes.activo:hover { background: var(--interes-fondo); }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 900px) {
+    .contenido { grid-template-columns: 1fr; padding: 1rem; }
+    .panel-mapa { position: static; }
+    #mapa { height: 380px; min-height: 0; }
+    .ir-al-mapa { display: inline; }
+}
+
+@media (max-width: 520px) {
+    .grilla { grid-template-columns: 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .interes-item.nuevo { animation: none; }
+}
