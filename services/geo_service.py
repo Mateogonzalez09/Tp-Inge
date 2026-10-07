@@ -3,15 +3,13 @@ import requests
 USIG_URL = "https://servicios.usig.buenosaires.gob.ar/normalizar/"
 NOMINATIM_URL = "https://nominatim.openstreetmap.org/search"
 
-# Direcciones ya resueltas (se comparte entre consultas para no repetir pedidos).
 _CACHE = {}
 
 
 class GeoService:
-    """Obtiene las coordenadas de una dirección.
-
-    Primero consulta USIG (muy buena para CABA). Si no devuelve nada, por ejemplo
-    con direcciones del conurbano, usa Nominatim (OpenStreetMap) como respaldo.
+    """Obtiene las coordenadas apartir de una dirección
+        en caso de que USIG no cargue las sedes de Buenos Aires
+        busca las coordenadas usando NOMINATIM
     """
 
     def obtener_coordenadas(self, direccion):
@@ -21,7 +19,7 @@ class GeoService:
             return _CACHE[direccion]
 
         coords = self._desde_usig(direccion) or self._desde_nominatim(direccion)
-        if coords:  # solo se guardan los aciertos, para reintentar los fallos
+        if coords:  
             _CACHE[direccion] = coords
         return coords
 
@@ -47,7 +45,7 @@ class GeoService:
             response = requests.get(
                 NOMINATIM_URL,
                 params={"q": direccion, "format": "json", "limit": 1, "countrycodes": "ar"},
-                headers={"User-Agent": "TP-Autoridades-de-Mesa/1.0"},  # Nominatim lo exige
+                headers={"User-Agent": "TP-Autoridades-de-Mesa/1.0"},  
                 timeout=5,
             )
             response.raise_for_status()

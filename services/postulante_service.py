@@ -6,7 +6,6 @@ from cargaPostulante import PostulanteRepository, PostulanteDuplicadoError
 DISTRITOS_VALIDOS = ("CABA", "Buenos Aires")
 PATRON_EMAIL = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
-# campo del payload -> nombre legible para el mensaje de error
 CAMPOS_REQUERIDOS = {
     "dni": "DNI",
     "nombre": "nombre",
@@ -18,14 +17,10 @@ CAMPOS_REQUERIDOS = {
     "distritoElectoral": "distrito electoral",
 }
 
-
 class PostulanteService:
-    """Reglas de negocio del registro de postulantes. No conoce HTTP ni SQL."""
 
     def __init__(self):
         self.repo = PostulanteRepository()
-        # YAGNI: lista en memoria para la prueba de concepto.
-        # Simula los administradores que tienen prohibido postularse.
         self.admins_dnis = ["99999999", "11111111"]
 
     def registrar(self, datos):

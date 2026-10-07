@@ -1,8 +1,8 @@
 from .geo_service import GeoService
 
-# Datos de ejemplo precargados. Las coordenadas NO se cargan acá: se piden a la
-# API USIG a partir de la dirección de cada sede. "distrito" permite filtrar las
-# sedes en el frontend.
+# Datos de ejemplo precargados
+# Se pasa la direccion de cada sede a las API USIG para que retorne las coordenadas
+# Y se filtran utilizando el distrito de cada sede
 CHARLAS_DE_EJEMPLO = [
     {"id": 1, "nombre": "Orientación General", "tema": "Rol y responsabilidades de la autoridad de mesa",
      "fecha": "2026-11-01", "horario": "10:00", "distrito": "CABA",
