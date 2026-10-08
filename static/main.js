@@ -2,17 +2,27 @@ const API = 'http://127.0.0.1:5000/api';
 
 // ---------- Referencias al DOM ----------
 const form = document.getElementById('form-postulante');
+form.addEventListener('submit', (event) => event.preventDefault(), { capture: true });
+const modalRegistro = document.getElementById('modal-registro');
+const botonAbrirRegistro = document.getElementById('btn-abrir-registro');
+const botonCerrarRegistro = document.getElementById('btn-cerrar-registro');
 const checkAfiliado = document.getElementById('es_afiliado');
 const campoPartido = document.getElementById('campo-partido');
 const inputPartido = document.getElementById('partido_afiliado');
 const selDistrito = document.getElementById('distrito');
 const msgError = document.getElementById('mensaje-error');
 const msgExito = document.getElementById('mensaje-exito');
+const textoMsgExito = document.getElementById('texto-mensaje-exito');
+const botonCerrarNotificacion = document.getElementById('btn-cerrar-notificacion');
 
 const cajaInteres = document.getElementById('caja-interes');
 const listaInteres = document.getElementById('lista-interes');
 const interesVacio = document.getElementById('interes-vacio');
+const mensajeInteresVacio = document.getElementById('mensaje-interes-vacio');
 const contadorInteres = document.getElementById('contador-interes');
+const filtroDistritoCharlas = document.getElementById('filtro-distrito-charlas');
+const listaCharlas = document.getElementById('lista-charlas');
+const mensajeCharlas = document.getElementById('mensaje-charlas');
 const panelMapa = document.getElementById('panel-mapa');
 const mapaEstado = document.getElementById('mapa-estado');
 
@@ -22,12 +32,31 @@ const capaSedes = L.layerGroup();
 let marcadores = [];          // [{ sede, marker }]
 let sedesSinUbicar = [];      // sedes que la API de direcciones no pudo ubicar
 let sedesCargadas = false;
+let charlasOrientacion = [];
 const interes = new Map();    // id de charla -> charla
 let nuevoId = null;           // última charla agregada (para resaltarla en la lista)
+let temporizadorExito;
 
 const esMovil = () => window.matchMedia('(max-width: 900px)').matches;
 const comportamientoScroll = () =>
     window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
+
+// ---------- Modal de inscripción ----------
+function mostrarModal() {
+    if (!modalRegistro.open) modalRegistro.showModal();
+}
+
+function cerrarModal() {
+    if (modalRegistro.open) modalRegistro.close();
+}
+
+botonAbrirRegistro.addEventListener('click', mostrarModal);
+botonCerrarRegistro.addEventListener('click', cerrarModal);
+modalRegistro.addEventListener('close', aplicarFiltroVistaPrincipal);
+modalRegistro.addEventListener('click', (e) => {
+    if (e.target === modalRegistro) cerrarModal();
+});
+botonCerrarNotificacion.addEventListener('click', ocultarNotificacionExito);
 
 // ---------- Formulario ----------
 checkAfiliado.addEventListener('change', (e) => {
@@ -37,6 +66,7 @@ checkAfiliado.addEventListener('change', (e) => {
 });
 
 selDistrito.addEventListener('change', aplicarFiltroDistrito);
+filtroDistritoCharlas.addEventListener('change', aplicarFiltroVistaPrincipal);
 
 form.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -84,7 +114,8 @@ async function registrarPostulante(datos) {
         interes.clear();
         renderListaInteres();
         aplicarFiltroDistrito();
-        mostrarAlerta(msgExito, 'Inscripción registrada correctamente.');
+        cerrarModal();
+        mostrarNotificacionExito();
     } catch (error) {
         mostrarAlerta(msgError, error.message);
     }
@@ -106,10 +137,13 @@ async function cargarCharlas() {
         if (!response.ok) throw new Error('Respuesta inválida del servidor');
 
         const charlas = await response.json();
+        charlasOrientacion = charlas;
         crearMarcadores(charlas);
         sedesCargadas = true;
-        aplicarFiltroDistrito();
+        renderListaInteres();
+        aplicarFiltroVistaPrincipal();
     } catch (error) {
+        mensajeCharlas.textContent = 'No se pudieron cargar las charlas de orientación.';
         mostrarEstadoMapa('No se pudieron cargar las sedes. Verificá que el servidor esté en funcionamiento.', true);
     }
 }
@@ -149,10 +183,7 @@ function aplicarFiltroDistrito() {
     if (!sedesCargadas) return;
 
     const distrito = selDistrito.value;
-    const visibles = marcadores.filter(({ sede }) => !distrito || sede.distrito === distrito);
-
-    capaSedes.clearLayers();
-    visibles.forEach(({ marker }) => capaSedes.addLayer(marker));
+    const { visibles, sinUbicar } = actualizarMarcadores(distrito);
 
     // Las charlas de interés de otro distrito ya no corresponden
     let quitadas = 0;
@@ -165,11 +196,51 @@ function aplicarFiltroDistrito() {
         }
     }
 
+    let texto = crearEstadoMapa(distrito, visibles, sinUbicar);
+    if (quitadas) {
+        texto += ` Se quitó ${quitadas} ${plural(quitadas, 'charla', 'charlas')} de tu lista por no corresponder a ese distrito.`;
+    }
+    mostrarEstadoMapa(texto, false);
+
+    renderListaInteres();
+    refrescarPopups();
+}
+
+function aplicarFiltroVistaPrincipal() {
+    if (!sedesCargadas) return;
+
+    const distrito = filtroDistritoCharlas.value;
+    const charlasVisibles = charlasOrientacion
+        .filter((charla) => !distrito || charla.distrito === distrito)
+        .sort((a, b) => (a.fecha + a.horario).localeCompare(b.fecha + b.horario));
+    listaCharlas.replaceChildren(...charlasVisibles.map(crearItemCharla));
+    mensajeCharlas.classList.toggle('oculto', charlasVisibles.length > 0);
+    if (!charlasVisibles.length) {
+        mensajeCharlas.textContent = distrito
+            ? `Todavía no hay charlas cargadas en ${distrito}.`
+            : 'No hay charlas de orientación cargadas.';
+    }
+
+    const { visibles, sinUbicar } = actualizarMarcadores(distrito);
+    mostrarEstadoMapa(crearEstadoMapa(distrito, visibles, sinUbicar), false);
+    refrescarPopups();
+}
+
+function actualizarMarcadores(distrito) {
+    const visibles = marcadores.filter(({ sede }) => !distrito || sede.distrito === distrito);
+    capaSedes.clearLayers();
+    visibles.forEach(({ marker }) => capaSedes.addLayer(marker));
+
     if (visibles.length) {
         const limites = L.latLngBounds(visibles.map(({ marker }) => marker.getLatLng()));
         mapa.fitBounds(limites, { padding: [50, 50], maxZoom: 14 });
     }
 
+    const sinUbicar = sedesSinUbicar.filter((sede) => !distrito || sede.distrito === distrito);
+    return { visibles, sinUbicar };
+}
+
+function crearEstadoMapa(distrito, visibles, sinUbicar) {
     let texto;
     if (!distrito) {
         texto = `Mostrando ${visibles.length} ${plural(visibles.length, 'sede', 'sedes')} de todos los distritos. Elegí tu distrito electoral para filtrarlas.`;
@@ -178,17 +249,10 @@ function aplicarFiltroDistrito() {
     } else {
         texto = `Todavía no hay sedes cargadas en ${distrito}.`;
     }
-    const sinUbicar = sedesSinUbicar.filter((sede) => !distrito || sede.distrito === distrito);
     if (sinUbicar.length) {
         texto += ` No se pudo ubicar en el mapa: ${sinUbicar.map((sede) => sede.nombre).join(', ')}.`;
     }
-    if (quitadas) {
-        texto += ` Se quitó ${quitadas} ${plural(quitadas, 'charla', 'charlas')} de tu lista por no corresponder a ese distrito.`;
-    }
-    mostrarEstadoMapa(texto, false);
-
-    renderListaInteres();
-    refrescarPopups();
+    return texto;
 }
 
 // ---------- Popup de sede ----------
@@ -243,23 +307,27 @@ function alternarInteres(charla) {
 }
 
 function renderListaInteres() {
-    const charlas = [...interes.values()]
+    const distrito = selDistrito.value;
+    const charlas = charlasOrientacion
+        .filter((charla) => !distrito || charla.distrito === distrito)
         .sort((a, b) => (a.fecha + a.horario).localeCompare(b.fecha + b.horario));
 
     listaInteres.replaceChildren(...charlas.map(crearItemInteres));
 
-    const hay = charlas.length > 0;
-    interesVacio.classList.toggle('oculto', hay);
-    cajaInteres.classList.toggle('vacia', !hay);
-    contadorInteres.textContent = hay
-        ? `· ${charlas.length} ${plural(charlas.length, 'seleccionada', 'seleccionadas')}`
+    interesVacio.classList.toggle('oculto', charlas.length > 0);
+    cajaInteres.classList.toggle('vacia', charlas.length === 0);
+    mensajeInteresVacio.textContent = distrito
+        ? `No hay charlas disponibles en ${distrito}.`
+        : 'No hay charlas disponibles.';
+    contadorInteres.textContent = interes.size
+        ? `· ${interes.size} ${plural(interes.size, 'seleccionada', 'seleccionadas')}`
         : '';
     nuevoId = null;
 }
 
-function crearItemInteres(charla) {
+function crearItemCharla(charla) {
     const li = document.createElement('li');
-    li.className = 'interes-item' + (charla.id === nuevoId ? ' nuevo' : '');
+    li.className = 'charla-item';
 
     const datos = document.createElement('div');
     datos.className = 'interes-datos';
@@ -269,22 +337,46 @@ function crearItemInteres(charla) {
         crearTexto('span', `${charla.sede_nombre} — ${charla.sede_direccion}`)
     );
 
-    const verMapa = document.createElement('button');
-    verMapa.type = 'button';
-    verMapa.className = 'btn-texto';
-    verMapa.textContent = 'Ver en el mapa';
-    verMapa.addEventListener('click', () => verEnMapa(charla));
+    const acciones = document.createElement('div');
+    acciones.className = 'interes-acciones';
+    const estaUbicada = marcadores.some(({ sede }) => sede.charlas.some(({ id }) => id === charla.id));
+    if (estaUbicada) {
+        const verMapa = document.createElement('button');
+        verMapa.type = 'button';
+        verMapa.className = 'btn-texto';
+        verMapa.textContent = 'Ver en el mapa';
+        verMapa.addEventListener('click', () => verEnMapa(charla));
+        acciones.append(verMapa);
+    } else {
+        acciones.append(crearTexto('span', 'Ubicación no disponible en el mapa'));
+    }
 
-    const quitar = document.createElement('button');
-    quitar.type = 'button';
-    quitar.className = 'btn-texto quitar';
-    quitar.textContent = 'Quitar';
-    quitar.setAttribute('aria-label', `Quitar ${charla.nombre} de mis charlas de interés`);
-    quitar.addEventListener('click', () => alternarInteres(charla));
+    li.append(datos, acciones);
+    return li;
+}
+
+function crearItemInteres(charla) {
+    const li = document.createElement('li');
+    const marcada = interes.has(charla.id);
+    li.className = 'interes-item' + (marcada ? ' seleccionada' : '') + (charla.id === nuevoId ? ' nuevo' : '');
+
+    const datos = document.createElement('div');
+    datos.className = 'interes-datos';
+    datos.append(
+        crearTexto('strong', charla.nombre),
+        crearTexto('span', `${formatearFecha(charla.fecha)} · ${charla.horario} hs`),
+        crearTexto('span', `${charla.sede_nombre} — ${charla.sede_direccion}`)
+    );
 
     const acciones = document.createElement('div');
     acciones.className = 'interes-acciones';
-    acciones.append(verMapa, quitar);
+    const botonInteres = document.createElement('button');
+    botonInteres.type = 'button';
+    botonInteres.className = 'btn-seleccion-interes';
+    botonInteres.textContent = marcada ? 'Quitar de mis intereses' : 'Me interesa';
+    botonInteres.setAttribute('aria-pressed', String(marcada));
+    botonInteres.addEventListener('click', () => alternarInteres(charla));
+    acciones.append(botonInteres);
 
     li.append(datos, acciones);
     return li;
@@ -328,9 +420,20 @@ function mostrarAlerta(elemento, mensaje) {
     elemento.scrollIntoView({ block: 'nearest', behavior: comportamientoScroll() });
 }
 
+function mostrarNotificacionExito() {
+    clearTimeout(temporizadorExito);
+    textoMsgExito.textContent = 'Inscripción registrada correctamente.';
+    msgExito.classList.remove('oculto');
+    temporizadorExito = setTimeout(ocultarNotificacionExito, 5000);
+}
+
+function ocultarNotificacionExito() {
+    clearTimeout(temporizadorExito);
+    msgExito.classList.add('oculto');
+}
+
 function ocultarAlertas() {
     msgError.classList.add('oculto');
-    msgExito.classList.add('oculto');
 }
 
 // ---------- Inicio ----------

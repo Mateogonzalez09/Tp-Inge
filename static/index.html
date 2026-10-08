@@ -13,84 +13,30 @@
 </head>
 <body>
     <header class="cabecera">
-        <h1>Convocatoria Autoridades de Mesa</h1>
-        <p>Completá tu inscripción y marcá en el mapa las charlas informativas que te interesan.</p>
+        <div class="cabecera-texto">
+            <h1>Convocatoria Autoridades de Mesa</h1>
+            <p>Completá tu inscripción y marcá en el mapa las charlas informativas que te interesan.</p>
+        </div>
+        <button type="button" class="btn-registro-header" id="btn-abrir-registro" aria-haspopup="dialog">Registrarme</button>
     </header>
 
     <main class="contenido">
+        <section class="panel-charlas" aria-label="Charlas de orientación">
+            <div class="campo campo-completo">
+                <label for="filtro-distrito-charlas">Distrito electoral</label>
+                <select id="filtro-distrito-charlas">
+                    <option value="">Todos los distritos</option>
+                    <option value="CABA">CABA</option>
+                    <option value="Buenos Aires">Buenos Aires</option>
+                </select>
+            </div>
 
-        <form id="form-postulante" class="formulario">
-
-            <fieldset class="caja">
-                <legend>Datos personales</legend>
-                <div class="grilla">
-                    <div class="campo">
-                        <label for="nombre">Nombre</label>
-                        <input type="text" id="nombre" autocomplete="given-name" required>
-                    </div>
-                    <div class="campo">
-                        <label for="apellido">Apellido</label>
-                        <input type="text" id="apellido" autocomplete="family-name" required>
-                    </div>
-                    <div class="campo">
-                        <label for="dni">DNI</label>
-                        <input type="text" id="dni" required>
-                    </div>
-                    <div class="campo">
-                        <label for="fecha_nacimiento">Fecha de nacimiento</label>
-                        <input type="date" id="fecha_nacimiento" autocomplete="bday" required>
-                    </div>
-                    <div class="campo campo-completo">
-                        <label for="direccion">Dirección actual</label>
-                        <input type="text" id="direccion" autocomplete="street-address" required>
-                    </div>
-                    <div class="campo">
-                        <label for="telefono">Teléfono</label>
-                        <input type="tel" id="telefono" autocomplete="tel" required>
-                    </div>
-                    <div class="campo">
-                        <label for="correo">Correo de contacto</label>
-                        <input type="email" id="correo" autocomplete="email" required>
-                    </div>
-                    <div class="campo campo-completo">
-                        <label for="distrito">Distrito electoral</label>
-                        <select id="distrito" required>
-                            <option value="">Seleccioná tu distrito…</option>
-                            <option value="CABA">CABA</option>
-                            <option value="Buenos Aires">Buenos Aires</option>
-                        </select>
-                        <small>El mapa muestra solo las sedes del distrito que elijas.</small>
-                    </div>
-                </div>
+            <fieldset class="caja" id="panel-lista-charlas">
+                <legend>Charlas de orientación</legend>
+                <p class="mensaje-charlas" id="mensaje-charlas">Cargando charlas de orientación…</p>
+                <ul class="lista-charlas" id="lista-charlas" aria-live="polite"></ul>
             </fieldset>
-
-            <fieldset class="caja">
-                <legend>Antecedentes y afiliación</legend>
-                <label class="check"><input type="checkbox" id="fue_autoridad"> Fui autoridad de mesa previamente</label>
-                <label class="check"><input type="checkbox" id="hizo_capacitacion"> Realicé la capacitación</label>
-                <label class="check"><input type="checkbox" id="es_afiliado"> Estoy afiliado a una agrupación política</label>
-                <div class="campo campo-partido oculto" id="campo-partido">
-                    <label for="partido_afiliado">Nombre de la agrupación política</label>
-                    <input type="text" id="partido_afiliado">
-                </div>
-            </fieldset>
-
-            <fieldset class="caja caja-interes vacia" id="caja-interes">
-                <legend>
-                    Charlas de interés <span class="opcional">(opcional)</span>
-                    <span class="contador" id="contador-interes"></span>
-                </legend>
-                <p class="interes-vacio" id="interes-vacio">
-                    Todavía no marcaste ninguna charla. Tocá una sede en el mapa y elegí <strong>Me interesa</strong>.
-                    <a href="#panel-mapa" class="ir-al-mapa">Ir al mapa</a>
-                </p>
-                <ul class="lista-interes" id="lista-interes" aria-live="polite"></ul>
-            </fieldset>
-
-            <div id="mensaje-error" class="oculto alerta error" role="alert"></div>
-            <div id="mensaje-exito" class="oculto alerta exito" role="status"></div>
-            <button type="submit" class="btn-primario">Registrarme</button>
-        </form>
+        </section>
 
         <aside class="panel-mapa" id="panel-mapa">
             <h2>Sedes de las charlas</h2>
@@ -99,6 +45,90 @@
         </aside>
 
     </main>
+
+    <div class="notificacion-exito oculto" id="mensaje-exito">
+        <span id="texto-mensaje-exito" role="status" aria-live="polite"></span>
+        <button type="button" class="btn-cerrar-notificacion" id="btn-cerrar-notificacion" aria-label="Cerrar notificación">×</button>
+    </div>
+
+    <dialog class="modal-registro" id="modal-registro" aria-labelledby="titulo-modal-registro">
+        <div class="modal-contenido">
+            <div class="modal-cabecera">
+                <h2 id="titulo-modal-registro">Inscripción</h2>
+                <button type="button" class="btn-cerrar-modal" id="btn-cerrar-registro" aria-label="Cerrar formulario">×</button>
+            </div>
+
+            <form id="form-postulante" class="formulario">
+                <fieldset class="caja">
+                    <legend>Datos personales</legend>
+                    <div class="grilla">
+                        <div class="campo">
+                            <label for="nombre">Nombre</label>
+                            <input type="text" id="nombre" autocomplete="given-name" required>
+                        </div>
+                        <div class="campo">
+                            <label for="apellido">Apellido</label>
+                            <input type="text" id="apellido" autocomplete="family-name" required>
+                        </div>
+                        <div class="campo">
+                            <label for="dni">DNI</label>
+                            <input type="text" id="dni" required>
+                        </div>
+                        <div class="campo">
+                            <label for="fecha_nacimiento">Fecha de nacimiento</label>
+                            <input type="date" id="fecha_nacimiento" autocomplete="bday" required>
+                        </div>
+                        <div class="campo campo-completo">
+                            <label for="direccion">Dirección actual</label>
+                            <input type="text" id="direccion" autocomplete="street-address" required>
+                        </div>
+                        <div class="campo">
+                            <label for="telefono">Teléfono</label>
+                            <input type="tel" id="telefono" autocomplete="tel" required>
+                        </div>
+                        <div class="campo">
+                            <label for="correo">Correo de contacto</label>
+                            <input type="email" id="correo" autocomplete="email" required>
+                        </div>
+                        <div class="campo campo-completo">
+                            <label for="distrito">Distrito electoral</label>
+                            <select id="distrito" required>
+                                <option value="">Seleccioná tu distrito…</option>
+                                <option value="CABA">CABA</option>
+                                <option value="Buenos Aires">Buenos Aires</option>
+                            </select>
+                            <small>El mapa muestra solo las sedes del distrito que elijas.</small>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <fieldset class="caja">
+                    <legend>Antecedentes y afiliación</legend>
+                    <label class="check"><input type="checkbox" id="fue_autoridad"> Fui autoridad de mesa previamente</label>
+                    <label class="check"><input type="checkbox" id="hizo_capacitacion"> Realicé la capacitación</label>
+                    <label class="check"><input type="checkbox" id="es_afiliado"> Estoy afiliado a una agrupación política</label>
+                    <div class="campo campo-partido oculto" id="campo-partido">
+                        <label for="partido_afiliado">Nombre de la agrupación política</label>
+                        <input type="text" id="partido_afiliado">
+                    </div>
+                </fieldset>
+
+                <fieldset class="caja caja-interes vacia" id="caja-interes">
+                    <legend>
+                        Charlas de interés <span class="opcional">(opcional)</span>
+                        <span class="contador" id="contador-interes"></span>
+                    </legend>
+                    <p class="interes-vacio" id="interes-vacio">
+                        <span id="mensaje-interes-vacio">No hay charlas disponibles.</span>
+                    </p>
+                    <ul class="lista-interes" id="lista-interes" aria-live="polite"></ul>
+                </fieldset>
+
+                <div id="mensaje-error" class="oculto alerta error" role="alert"></div>
+                <button type="submit" class="btn-primario">Registrarme</button>
+            </form>
+        </div>
+    </dialog>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="/static/main.js"></script>
