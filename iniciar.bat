@@ -27,10 +27,10 @@ rem --- Backend en otra ventana (http://127.0.0.1:5000) ---
 start "Backend - Flask" cmd /k python app.py
 
 rem --- Abrir el navegador a los 3 segundos ---
-start "" /min cmd /c "timeout /t 3 >nul & start http://127.0.0.1:5500/Pr.html"
+start "" /min cmd /c "timeout /t 3 >nul & start http://127.0.0.1:5500/static/index.html"
 
 rem --- Frontend en esta ventana (http://127.0.0.1:5500) ---
 echo.
-echo Frontend en http://127.0.0.1:5500/Pr.html
+echo Frontend en http://127.0.0.1:5500/static/index.html
 echo Para terminar, cerra esta ventana y la del Backend.
 python -m http.server 5500
