@@ -55,5 +55,15 @@ services/                   Lógica de negocio, un archivo por clase
   geo_service.py              Consulta a la API USIG para obtener coordenadas dinámicamente
 cargaPostulante.py          Acceso a datos (SQLite) de los postulantes
 database.py                 Creación del esquema de la base de datos
-index.html / style.css / main.js    Interfaz del postulante
+static/index.html          Pantalla del postulante (estructura)
+static/style.css           Estilos
+static/js/                 Interfaz, un módulo por responsabilidad (se cargan como ES modules)
+  main.js                    Arranque y conexión entre los módulos
+  api.js                     Llamadas al backend (charlas y registro)
+  estado.js                  Estado compartido (charlas cargadas e intereses marcados)
+  mapa.js                    Mapa Leaflet: sedes, marcadores y popups
+  listaCharlas.js            Lista de charlas de la pantalla principal
+  intereses.js               Cuadro "Charlas de interés" del formulario
+  formulario.js              Modal de inscripción: leer, enviar y avisar el resultado
+  utilidades.js              Funciones auxiliares (fechas, plurales, ordenar, filtrar)
 
