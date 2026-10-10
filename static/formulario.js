@@ -22,6 +22,31 @@ export function iniciarFormulario({
     const botonCerrarNotificacion = document.getElementById('btn-cerrar-notificacion');
     let temporizadorExito;
 
+    // --- NUEVO: Función para bloquear caracteres inválidos en tiempo real mientras escriben ---
+    function configurarRestriccionesInputs() {
+        const inputNombre = document.getElementById('nombre');
+        const inputApellido = document.getElementById('apellido');
+        const inputDni = document.getElementById('dni');
+        const inputTelefono = document.getElementById('telefono');
+
+        // Nombre y Apellido: solo letras del abecedario y espacios
+        const filtrarLetras = (e) => {
+            e.target.value = e.target.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ\s]/g, '');
+        };
+        inputNombre.addEventListener('input', filtrarLetras);
+        inputApellido.addEventListener('input', filtrarLetras);
+
+        // DNI y Teléfono: únicamente números enteros (sin letras ni símbolos)
+        const filtrarNumeros = (e) => {
+            e.target.value = e.target.value.replace(/\D/g, '');
+        };
+        inputDni.addEventListener('input', filtrarNumeros);
+        inputTelefono.addEventListener('input', filtrarNumeros);
+    }
+
+    // LLAMAMOS A LA FUNCIÓN AL INICIO DE TODO EN EL FORMULARIO
+    configurarRestriccionesInputs();
+
     function mostrarModal() {
         if (!modalRegistro.open) modalRegistro.showModal();
     }
@@ -66,13 +91,28 @@ export function iniciarFormulario({
         event.preventDefault();
         ocultarAlertas();
 
+        // Leemos los valores limpios de DNI y Teléfono
+        const dniVal = document.getElementById('dni').value.trim();
+        const telefonoVal = document.getElementById('telefono').value.trim();
+
+        // Validación estricta final por seguridad antes de armar el payload
+        if (!/^\d+$/.test(dniVal)) {
+            mostrarAlerta(msgError, 'El DNI debe contener únicamente números enteros.');
+            return;
+        }
+
+        if (!/^\d+$/.test(telefonoVal)) {
+            mostrarAlerta(msgError, 'El teléfono debe contener únicamente números enteros.');
+            return;
+        }
+
         const payload = {
-            dni: document.getElementById('dni').value.trim(),
+            dni: dniVal,
             apellido: document.getElementById('apellido').value.trim(),
             nombre: document.getElementById('nombre').value.trim(),
             fechaNacimiento: document.getElementById('fecha_nacimiento').value,
             email: document.getElementById('correo').value.trim(),
-            telefono: parseInt(document.getElementById('telefono').value.replace(/\D/g, ''), 10),
+            telefono: parseInt(telefonoVal, 10), // Acá ya sabemos seguro que son solo números
             direccion: document.getElementById('direccion').value.trim(),
             distritoElectoral: selDistrito.value,
             autoridadDeMesa: document.getElementById('fue_autoridad').checked ? 1 : 0,
@@ -80,11 +120,6 @@ export function iniciarFormulario({
             nombrePartido: inputPartido.value.trim(),
             charlasSeleccionadas: obtenerCharlasSeleccionadas()
         };
-
-        if (isNaN(payload.telefono)) {
-            mostrarAlerta(msgError, 'El teléfono debe ser un valor numérico válido.');
-            return;
-        }
 
         await registrarPostulante(payload);
     });

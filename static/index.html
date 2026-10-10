@@ -64,15 +64,15 @@
                     <div class="grilla">
                         <div class="campo">
                             <label for="nombre">Nombre</label>
-                            <input type="text" id="nombre" autocomplete="given-name" required>
+                            <input type="text" id="nombre" autocomplete="given-name" pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+" title="Solo se permiten letras" required>
                         </div>
                         <div class="campo">
                             <label for="apellido">Apellido</label>
-                            <input type="text" id="apellido" autocomplete="family-name" required>
+                            <input type="text" id="apellido" autocomplete="family-name" pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+" title="Solo se permiten letras" required>
                         </div>
                         <div class="campo">
                             <label for="dni">DNI</label>
-                            <input type="text" id="dni" required>
+                            <input type="text" id="dni" inputmode="numeric" pattern="[0-9]+" title="Solo números enteros" required>
                         </div>
                         <div class="campo">
                             <label for="fecha_nacimiento">Fecha de nacimiento</label>
@@ -84,7 +84,7 @@
                         </div>
                         <div class="campo">
                             <label for="telefono">Teléfono</label>
-                            <input type="tel" id="telefono" autocomplete="tel" required>
+                            <input type="tel" id="telefono" inputmode="numeric" autocomplete="tel" pattern="[0-9]+" title="Solo números enteros" required>
                         </div>
                         <div class="campo">
                             <label for="correo">Correo de contacto</label>
