@@ -28,11 +28,16 @@ class PostulanteRepository:
                     postulante.get('nombrePartido')
                 ))
             
+                # NUEVO: Capturamos el ID autogenerado del postulante que acabamos de insertar
+                postulante_id = cursor.lastrowid
+            
                 if charlas_ids:
                     for charla_id in charlas_ids:
+                        # MODIFICADO: Ahora insertamos postulante_id en vez del DNI
                         cursor.execute("""
-                            INSERT INTO postulante_charla (dni_postulante, charla_id)
+                            INSERT INTO postulante_charla (postulante_id, charla_id)
                             VALUES (?, ?)
-                        """, (postulante['dni'], charla_id))
+                        """, (postulante_id, charla_id))
         except sqlite3.IntegrityError as error:
-            raise PostulanteDuplicadoError() from error
+            # El error saltará automáticamente si se viola el UNIQUE del DNI
+            raise PostulanteDuplicadoError() from error 

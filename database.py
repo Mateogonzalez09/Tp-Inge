@@ -26,12 +26,13 @@ def inicializar_base_datos(ruta_db="elecciones.db"):
         
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS postulantes (
-                dni TEXT PRIMARY KEY,
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                dni TEXT UNIQUE NOT NULL,
                 nombre TEXT NOT NULL,
                 apellido TEXT NOT NULL,
                 fecha_nacimiento TEXT NOT NULL,
                 email TEXT NOT NULL,
-                telefono INTEGER NOT NULL,
+                telefono TEXT NOT NULL,
                 direccion TEXT NOT NULL,
                 distrito_electoral TEXT NOT NULL,
                 autoridad_de_mesa INTEGER NOT NULL,
@@ -42,10 +43,10 @@ def inicializar_base_datos(ruta_db="elecciones.db"):
         
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS postulante_charla (
-                dni_postulante TEXT NOT NULL,
+                postulante_id INTEGER NOT NULL,
                 charla_id INTEGER NOT NULL,
-                PRIMARY KEY (dni_postulante, charla_id),
-                FOREIGN KEY (dni_postulante) REFERENCES postulantes (dni),
+                PRIMARY KEY (postulante_id, charla_id),
+                FOREIGN KEY (postulante_id) REFERENCES postulantes (id),
                 FOREIGN KEY (charla_id) REFERENCES charlas (id)
             )
         """)
